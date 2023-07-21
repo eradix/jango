@@ -29,3 +29,11 @@ class PostModelForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'body': forms.Textarea(attrs={'class': 'form-control'}),
         }
+
+#search form
+class SearchPostForm(forms.Form):
+    q = forms.CharField( 
+      label='',
+      required = False,
+      max_length=100,
+      widget=forms.TextInput(attrs={'class': 'form-control me-2', 'placeholder' : 'Search post'}))

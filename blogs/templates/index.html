@@ -4,15 +4,28 @@
 
     {% block content %}
         <div class="container">
+
+        <form class="d-flex col-lg-6 mx-auto" role="search" action="{% url 'index' %}">
+            {{ search_form }}
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+
+        {% if search_q %}
+        
+            <div class="my-2">
+                <p>Search results for: '<span class="text-success">{{ search_q }}'</span></p>
+            </div>
+
+        {% endif %}
         
 
         <div class="row">
 
         {% for post in posts  %}
 
-            <div class="col-lg-3 g-3">
+            <div class="col-lg-4 g-3 ">
 
-                <div class="border border-dark-subtle p-3">
+                <div class="border border-dark-subtle p-3 bg-light">
 
                     <h2 class="text-truncate">
                         <a href="{% url 'show_post' post.id %}" class="text-dark text-decoration-none">
