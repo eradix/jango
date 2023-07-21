@@ -1,13 +1,26 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post, Category
-from .forms import PostForm, PostModelForm
+from .forms import PostForm, PostModelForm, SearchPostForm
 from django.views.decorators.http import require_POST
+from django.db.models import Q
 
 
 def index(request):
-    posts = Post.objects.all()
+    
+    search =  request.GET.get('q')
+
+    search_form = SearchPostForm(request.GET)
+
+    if search:
+       posts = Post.objects.filter(Q(title__icontains=search) | Q(body__icontains=search))
+    else:   
+      posts = Post.objects.all()
+
     context = {
-        'posts' : posts
+        'posts' : posts,
+        'search_form' : search_form,
+        'search_q' : search,
+        'header' : "Home / Posts"
     }
     return render(request, 'index.html', context)
 
@@ -16,7 +29,8 @@ def show_post(request,id):
     post = get_object_or_404(Post, id=id)
 
     context = {
-        'post' : post
+        'post' : post,
+        'header' : "Post / info"
     }
 
     return render(request, 'show_post.html', context)
@@ -41,7 +55,7 @@ def create_post(request):
   else:
     form = PostForm()
     
-  return render(request, 'form_post.html', {'form': form})
+  return render(request, 'form_post.html', {'form': form, 'header' : "Post / create"})
 
 
 #update
@@ -57,7 +71,7 @@ def update_post(request,id):
     else:
         form = PostModelForm(instance=post)
 
-    return render(request, 'form_post.html', {'form': form})
+    return render(request, 'form_post.html', {'form': form, 'header' : "Post / edit"})
 
 #delete
 @require_POST
@@ -70,3 +84,7 @@ def destroy_post(request,id):
     post.delete()
 
     return redirect('index')
+
+#filtering post
+# def search_post(request,searchQuery):
+#    posts = Post.objects.filter()
