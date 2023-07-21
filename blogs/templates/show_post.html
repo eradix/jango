@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+    {% block title %} Info {% endblock title %} 
+
+    {% block content %}
+
+        <div class="container border border-dark-subtle p-3 my-3">
+
+            <h2>{{ post.title }}</h2>
+            <span class="badge bg-success block">{{ post.category.name }}</span>
+            <p class="lead text-muted">{{ post.body }}</p>
+
+            <a href="{% url 'update_post' post.id %}" class="btn btn-outline-primary">Edit</a>
+
+            <form action="{% url 'delete_post' post.id %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-danger" onclick="return confirm('Delete this post?')">Delete</button>
+            </form>
+
+        </div>
+        
+    {% endblock %}
+
+
