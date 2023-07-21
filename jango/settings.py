@@ -74,14 +74,15 @@ WSGI_APPLICATION = 'jango.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "jango",
-        "USER": "eradix",
-        "PASSWORD": "12345678eradix",
-        "HOST": "127.0.0.1",
-        "PORT": "3306",
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'jango',
+        'USER': 'eradix',
+        'PASSWORD': '12345678eradix',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
