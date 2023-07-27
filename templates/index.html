@@ -2,6 +2,20 @@
 
     {% block title %} Home {% endblock title %} 
 
+    {% block message %}
+    
+        {% if messages %}
+        <div x-data="{ visible: true }" x-init="setTimeout(() => { visible = false }, 3000)">
+            <div class="alert alert-success" role="alert" x-show="visible">
+                {% for message in messages %}
+                <p class="text-center">{{ message }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    
+    {%endblock%}
+
     {% block content %}
         <div class="container">
 

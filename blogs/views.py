@@ -3,8 +3,10 @@ from .models import Post, Category
 from .forms import PostForm, PostModelForm, SearchPostForm
 from django.views.decorators.http import require_POST
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
-
+@login_required
 def index(request):
     
     search =  request.GET.get('q')
@@ -24,6 +26,7 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
+@login_required
 def show_post(request,id):
 
     post = get_object_or_404(Post, id=id)
@@ -35,6 +38,7 @@ def show_post(request,id):
 
     return render(request, 'show_post.html', context)
 
+@login_required
 def create_post(request):
   
   if request.method == 'POST':
@@ -51,6 +55,9 @@ def create_post(request):
 
       latest_id = Post.objects.latest('id').id
 
+      # create flash message
+      messages.success(request, "Post successfully created.")
+
       return redirect('show_post', latest_id)
   else:
     form = PostForm()
@@ -59,6 +66,7 @@ def create_post(request):
 
 
 #update
+@login_required
 def update_post(request,id):
 
     post = get_object_or_404(Post, id=id)
@@ -67,6 +75,9 @@ def update_post(request,id):
         form = PostModelForm(request.POST, instance=post)
         if form.is_valid():
             form.save()
+
+            # create flash message
+            messages.success(request, "Post successfully updated.")
             return redirect('show_post', post.id)
     else:
         form = PostModelForm(instance=post)
@@ -75,6 +86,7 @@ def update_post(request,id):
 
 #delete
 @require_POST
+@login_required
 def destroy_post(request,id):
   
   post = get_object_or_404(Post, id=id)
@@ -83,8 +95,7 @@ def destroy_post(request,id):
     
     post.delete()
 
-    return redirect('index')
+    # create flash message
+    messages.success(request, "Post successfully deleted.")
 
-#filtering post
-# def search_post(request,searchQuery):
-#    posts = Post.objects.filter()
+    return redirect('index')

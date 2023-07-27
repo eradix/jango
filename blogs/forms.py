@@ -1,6 +1,7 @@
 from django import forms
 from .models import Category, Post
 
+# class form for creating post
 class PostForm(forms.Form):
   
     category = forms.ModelChoiceField(

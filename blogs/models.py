@@ -6,6 +6,7 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # return name when object is called
     def __str__(self):
         return self.name
 
@@ -16,3 +17,7 @@ class Post(models.Model):
     category =  models.ForeignKey(Category, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # return name when object is called
+    def __str__(self):
+        return self.name
