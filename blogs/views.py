@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 @login_required
 def index(request):
@@ -47,10 +48,13 @@ def create_post(request):
       title = form.cleaned_data['title']
       body = form.cleaned_data['body']
       id = form.cleaned_data['category'].id
+      user_id = request.user.id
 
       post = Post(title=title, 
                   body=body, 
-                  category=Category.objects.get(id=id))
+                  category=Category.objects.get(id=id),
+                  user = User.objects.get(id=user_id)
+                  )
       post.save()
 
       latest_id = Post.objects.latest('id').id
@@ -70,6 +74,11 @@ def create_post(request):
 def update_post(request,id):
 
     post = get_object_or_404(Post, id=id)
+
+    #check if current user owns this post
+    if not request.user.is_superuser and request.user.id != post.user.id:
+       messages.error(request, "Unauthorized access.")
+       return redirect('show_post', id)
   
     if request.method == 'POST':
         form = PostModelForm(request.POST, instance=post)
@@ -89,13 +98,18 @@ def update_post(request,id):
 @login_required
 def destroy_post(request,id):
   
+  #get post
   post = get_object_or_404(Post, id=id)
 
-  if request.method == 'POST':
-    
-    post.delete()
+  #check if current user owns this post
+  if not request.user.is_superuser and request.user.id != post.user.id:
+    messages.error(request, "Unauthorized access.")
+    return redirect('show_post', id)
+  
+  #delete the post
+  post.delete()
 
-    # create flash message
-    messages.success(request, "Post successfully deleted.")
+  # create flash message
+  messages.success(request, "Post successfully deleted.")
 
-    return redirect('index')
+  return redirect('index')

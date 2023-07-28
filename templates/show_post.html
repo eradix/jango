@@ -5,13 +5,24 @@
     {% block message %}
     
         {% if messages %}
+
         <div x-data="{ visible: true }" x-init="setTimeout(() => { visible = false }, 3000)">
-            <div class="alert alert-success" role="alert" x-show="visible">
-                {% for message in messages %}
-                <p class="text-center">{{ message }}</p>
-                {% endfor %}
-            </div>
+
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                    <div class="alert alert-danger" role="alert" x-show="visible">
+                        <p class="text-center">{{ message }}</p>
+                    </div>
+                {% else %}
+                    <div class="alert alert-{{message.tags}}" role="alert" x-show="visible">
+                        <p class="text-center">{{ message }}</p>
+                    </div>
+                {% endif %}
+
+            {% endfor %}
+            
         </div>
+        
         {% endif %}
     
     {%endblock%}
@@ -21,16 +32,20 @@
         <div class="container border border-dark-subtle bg-light p-3 my-3">
 
             <h2>{{ post.title }}</h2>
-            <span class="badge bg-success block">{{ post.category.name }}</span>
+            <p class="text-success"><span class="badge bg-success block">{{ post.category.name }} </span> | @{{ post.user.username }}</p>
             <p class="lead text-muted">{{ post.body }}</p>
             <p><small>{{ post.created_at }}</small></p>
 
-            <a href="{% url 'update_post' post.id %}" class="btn btn-outline-primary">Edit</a>
+            {% if request.user.id == post.user.id or request.user.is_superuser  %}
 
-            <form action="{% url 'delete_post' post.id %}" method="post" class="d-inline">
-                {% csrf_token %}
-                <button class="btn btn-danger" onclick="return confirm('Delete this post?')">Delete</button>
-            </form>
+                <a href="{% url 'update_post' post.id %}" class="btn btn-outline-primary">Edit</a>
+
+                <form action="{% url 'delete_post' post.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-danger" onclick="return confirm('Delete this post?')">Delete</button>
+                </form>
+
+            {% endif %}
 
         </div>
         
