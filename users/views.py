@@ -38,6 +38,7 @@ def login_user(request):
 
     return render(request, "auth/login.html", context)
 
+
 @require_POST
 @login_required
 def logout_user(request):
