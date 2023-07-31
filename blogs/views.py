@@ -6,6 +6,8 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator, EmptyPage
+
 
 @login_required
 def index(request):
@@ -19,10 +21,25 @@ def index(request):
     else:   
       posts = Post.objects.all()
 
+    #pagination
+    items_per_page = 9
+
+    paginator = Paginator(posts, items_per_page)
+    page_number = request.GET.get('page') if 'page' in request.GET else 1
+
+    #form page links if has search
+    page_link = f"?q={search}&page=" if search is not None else "?page="
+    
+    try:
+      posts = paginator.page(page_number)
+    except EmptyPage:
+      posts = None
+
     context = {
         'posts' : posts,
         'search_form' : search_form,
         'search_q' : search,
+        'page_link' : page_link,
         'header' : "Home / Posts"
     }
     return render(request, 'index.html', context)

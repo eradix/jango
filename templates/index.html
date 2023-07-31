@@ -35,26 +35,50 @@
 
         <div class="row">
 
-        {% for post in posts  %}
+        {% if posts %}
 
-            <div class="col-lg-4 g-3 ">
+            {% for post in posts  %}
 
-                <div class="border border-dark-subtle p-3 bg-light">
+                <div class="col-lg-4 g-3 ">
 
-                    <h2 class="text-truncate">
-                        <a href="{% url 'show_post' post.id %}" class="text-dark text-decoration-none">
-                            {{ post.title }}
-                        </a>
-                    </h2>
-                    <p class="text-success"><span class="badge bg-success block">{{ post.category.name }} </span> | @{{ post.user.username }}</p>
-                    <p class="lead text-muted">{{ post.body|slice:":100" }} ...</p>
+                    <div class="border border-dark-subtle p-3 bg-light">
+
+                        <h2 class="text-truncate">
+                            <a href="{% url 'show_post' post.id %}" class="text-dark text-decoration-none">
+                                {{ post.title }}
+                            </a>
+                        </h2>
+                        <p class="text-success"><span class="badge bg-success block">{{ post.category.name }} </span> | @{{ post.user.username }}</p>
+                        <p class="lead text-muted">{{ post.body|slice:":100" }} ...</p>
+
+                    </div>
 
                 </div>
+            
+            {% endfor %}
 
-            </div>
-        
-        {% endfor %}
+        {% else %}
 
+                <p>No post found</p>
+
+        {% endif %}
+
+        </div>
+
+        <div class="my-2">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if posts.has_previous %}
+                        <li class="page-item"><a class="page-link text-dark" href="{{ page_link }}1">&laquo; First</a></li>
+                        <li class="page-item"><a class="page-link text-dark" a href="{{ page_link }}{{ posts.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                  <li class="page-item"><span class="page-link text-success fw-bold">{{posts.number}}</span></li>
+                    {% if posts.has_next %}
+                        <li class="page-item"><a class="page-link text-dark" a href="{{ page_link }}{{ posts.next_page_number }}">Next</a></li>
+                        <li class="page-item"><a class="page-link text-dark" href="{{ page_link }}{{ posts.paginator.num_pages }}">Last &raquo;</a></li>
+                    {% endif %}
+                </ul>
+              </nav>
         </div>
 
         </div>
