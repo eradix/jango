@@ -29,23 +29,37 @@
 
     {% block content %}
 
-        <div class="container border border-dark-subtle bg-light p-3 my-3">
+        <div class="container">
 
-            <h2>{{ post.title }}</h2>
-            <p class="text-success"><span class="badge bg-success block">{{ post.category.name }} </span> | @{{ post.user.username }}</p>
-            <p class="lead text-muted">{{ post.body }}</p>
-            <p><small>{{ post.created_at }}</small></p>
+            <div class="col-lg-6 mx-auto">
+                <div class="card mb-3">
+                        {% if post.post_image %}
+                            <img src="{{ post.post_image.url }}" alt="{{ post.title }}" class="card-img-top" height="350">
+                            
+                        {% else %}
+                            <img src="https://placehold.co/640x960/333/FFFFFF/png?text={{ post.title}}" alt="{{ post.title }}" class="card-img-top" height="350">
+                        {% endif %}
+                    <div class="card-body">
+                    <h5 class="card-title">{{ post.title }}</h5>
+                    <p class="card-text"><span class="badge bg-success block">{{ post.category.name }} </span> | @{{ post.user.username }}</p>
+                    <p class="card-text">{{ post.body }}</p>
+                    <p class="card-text"><small class="text-body-secondary">{{ post.created_at }}</small></p>
+                    
+                    {% if request.user.id == post.user.id or request.user.is_superuser  %}
 
-            {% if request.user.id == post.user.id or request.user.is_superuser  %}
+                        <a href="{% url 'update_post' post.id %}" class="btn btn-outline-primary">Edit</a>
 
-                <a href="{% url 'update_post' post.id %}" class="btn btn-outline-primary">Edit</a>
+                        <form action="{% url 'delete_post' post.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button class="btn btn-danger" onclick="return confirm('Delete this post?')">Delete</button>
+                        </form>
 
-                <form action="{% url 'delete_post' post.id %}" method="post" class="d-inline">
-                    {% csrf_token %}
-                    <button class="btn btn-danger" onclick="return confirm('Delete this post?')">Delete</button>
-                </form>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
 
-            {% endif %}
+
 
         </div>
         

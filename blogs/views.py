@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post, Category
-from .forms import PostForm, PostModelForm, SearchPostForm
+from .forms import PostModelForm, SearchPostForm
 from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage
+from django.core.files.storage import FileSystemStorage
+import hashlib
+from PIL import Image
 
 
 @login_required
@@ -22,7 +25,7 @@ def index(request):
       posts = Post.objects.all()
 
     #pagination
-    items_per_page = 9
+    items_per_page = 10
 
     paginator = Paginator(posts, items_per_page)
     page_number = request.GET.get('page') if 'page' in request.GET else 1
@@ -60,28 +63,43 @@ def show_post(request,id):
 def create_post(request):
   
   if request.method == 'POST':
-    form = PostForm(request.POST)
+    form = PostModelForm(request.POST, request.FILES)
     if form.is_valid():
-      title = form.cleaned_data['title']
-      body = form.cleaned_data['body']
-      id = form.cleaned_data['category'].id
-      user_id = request.user.id
 
-      post = Post(title=title, 
-                  body=body, 
-                  category=Category.objects.get(id=id),
-                  user = User.objects.get(id=user_id)
-                  )
-      post.save()
+      form.instance.user = request.user
 
+      post_image = request.FILES.get('post_image', None)
+
+      if post_image:
+
+        # Calculate the hash of the uploaded file's content
+        file_hash = hashlib.md5(post_image.read()).hexdigest()
+
+        # Get the file extension
+        file_extension = post_image.name.split('.')[-1]
+
+        # Combine the hash and extension to create a unique filename
+        form.instance.post_image.name = f"{file_hash}.{file_extension}"
+      
+      #create post
+      post = form.save()
+
+      #if has post_image resize
+      if post.post_image:
+        image = Image.open(post.post_image.path)
+        resized_image = image.resize((640, 960))
+        resized_image.save(post.post_image.path)
+
+      #get the id of the created post
       latest_id = Post.objects.latest('id').id
 
       # create flash message
       messages.success(request, "Post successfully created.")
 
+      #redirect to show_post
       return redirect('show_post', latest_id)
   else:
-    form = PostForm()
+    form = PostModelForm()
     
   return render(request, 'form_post.html', {'form': form, 'header' : "Post / create"})
 
@@ -98,9 +116,29 @@ def update_post(request,id):
        return redirect('show_post', id)
   
     if request.method == 'POST':
-        form = PostModelForm(request.POST, instance=post)
+        form = PostModelForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            form.save()
+            post_image = request.FILES.get('post_image', None)
+            if post_image:
+              # Calculate the hash of the uploaded file's content
+              file_hash = hashlib.md5(post_image.read()).hexdigest()
+
+              # Get the file extension
+              file_extension = post_image.name.split('.')[-1]
+
+              # Combine the hash and extension to create a unique filename
+              unique_filename = f"{file_hash}.{file_extension}"
+
+              form.instance.post_image.name = unique_filename
+            
+            #save the form data
+            post = form.save()
+
+            # Resize the uploaded image to 640x960
+            if post.post_image:
+                image = Image.open(post.post_image.path)
+                resized_image = image.resize((640, 960))
+                resized_image.save(post.post_image.path)
 
             # create flash message
             messages.success(request, "Post successfully updated.")
