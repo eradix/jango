@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+    {% block title %} Categories {% endblock title %} 
+
+
+    {% block content %}
+        <div class="container">
+
+            <div class="row">
+
+                {% for category in categories %}
+                <div class="mb-5">
+                    <h2 class="fw-bold mb-3">{{ category.name }} | <small><a class="text-muted" href="{% url 'category_post' category.name.lower %}">all</a></small></h2>
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for post in category.post_set.all|dictsortreversed:"created_at"|slice:":2" %}
+                            <div class="col">
+                                <div class="card">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            {% if post.post_image %}
+                                                <img src="{{ post.post_image.url }}" alt="{{ post.title }}" class="img-fluid rounded-start">
+                                            {% else %}
+                                                <img src="https://placehold.co/640x960/333/FFFFFF/png?text={{ post.title}}" alt="{{ post.title }}" class="img-fluid rounded-start">
+                                            
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <a href="{% url 'show_post' post.id %}" class="text-dark text-decoration-none">
+                                                        {{ post.title }}
+                                                    </a>
+                                                </h5>
+                                                <p class="card-text text-success"><a href="{% url 'category_post' post.category.name.lower %}"><span class="badge bg-success block">{{ post.category.name }} </span></a> | @{{ post.user.username }}</p>
+                                                <p class="card-text">{{ post.body|slice:":100" }} ...</p>
+                                                <p class="card-text"><small class="text-body-secondary">Posted {{post.created_at|timesince}} ago</small></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                
+                </div>
+                {% endfor %}            
+            </div>
+        </div>
+
+    {% endblock %}
+
+

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+    {% block title %} {{ category.name }} {% endblock title %} 
+
+    {% block content %}
+        <div class="container">
+
+        <form class="d-flex col-lg-6 mx-auto" role="search" action="{% url 'category_post' category.name.lower %}">
+            {{ search_form }}
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+
+        {% if search_q %}
+        
+            <div class="my-2">
+                <p>Search results for: '<span class="text-success">{{ search_q }}'</span></p>
+            </div>
+
+        {% endif %}
+        
+        
+        <div class="my-4 row row-cols-1 g-4">
+
+            <div class="col-lg-8 mx-auto">
+
+                {% if posts %}
+
+                    {% for post in posts %}
+
+                    <div class="col mb-5">
+                        <div class="card">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    {% if post.post_image %}
+                                        <img src="{{ post.post_image.url }}" alt="{{ post.title }}" class="img-fluid rounded-start" style="height:300px; width:100%">
+                                    {% else %}
+                                        <img src="https://placehold.co/500x500/333/FFFFFF/png?text={{ post.title}}" alt="{{ post.title }}" class="img-fluid rounded-start">
+                                    
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <a href="{% url 'show_post' post.id %}" class="text-dark text-decoration-none">
+                                                {{ post.title }}
+                                            </a>
+                                        </h5>
+                                        <p class="card-text text-success"><a href="{% url 'category_post' post.category.name.lower %}"><span class="badge bg-success block">{{ post.category.name }} </span></a> | @{{ post.user.username }}</p>
+                                        <p class="card-text">{{ post.body|slice:":100" }} ...</p>
+                                        <p class="card-text"><small class="text-body-secondary">Posted {{post.created_at|timesince}} ago</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% endfor %}
+
+                {% else %}
+
+                        <p>No post found</p>
+
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="mb-3">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if posts.has_previous %}
+                        <li class="page-item"><a class="page-link text-dark" href="{{ page_link }}1">&laquo; First</a></li>
+                        <li class="page-item"><a class="page-link text-dark" a href="{{ page_link }}{{ posts.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+
+                    {% if posts %}
+                        <li class="page-item"><span class="page-link text-success fw-bold">{{posts.number}}</span></li>
+                    {% endif %}
+
+                    {% if posts.has_next %}
+                        <li class="page-item"><a class="page-link text-dark" a href="{{ page_link }}{{ posts.next_page_number }}">Next</a></li>
+                        <li class="page-item"><a class="page-link text-dark" href="{{ page_link }}{{ posts.paginator.num_pages }}">Last &raquo;</a></li>
+                    {% endif %}
+                </ul>
+              </nav>
+        </div>
+
+        </div>
+
+    {% endblock %}
+
+

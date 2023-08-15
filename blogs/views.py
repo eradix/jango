@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage
-from django.core.files.storage import FileSystemStorage
 import hashlib
 from PIL import Image
 
@@ -20,9 +19,9 @@ def index(request):
     search_form = SearchPostForm(request.GET)
 
     if search:
-       posts = Post.objects.filter(Q(title__icontains=search) | Q(body__icontains=search))
+       posts = Post.objects.filter(Q(title__icontains=search) | Q(body__icontains=search)).order_by('-created_at')
     else:   
-      posts = Post.objects.all()
+      posts = Post.objects.all().order_by('-created_at')
 
     #pagination
     items_per_page = 10
@@ -168,3 +167,53 @@ def destroy_post(request,id):
   messages.success(request, "Post successfully deleted.")
 
   return redirect('index')
+
+#list all genres
+def categories(request):
+   
+   categories = Category.objects.all().order_by("name")
+
+   context = {
+      'header' : 'All categories',
+      'categories' : categories
+   }
+   return render(request, 'categories.html', context)
+
+#all post by specific category
+def category_post(request, name):
+
+  category = get_object_or_404(Category, name=name)
+
+  search =  request.GET.get('q')
+
+  if search:
+    posts = category.post_set.filter(Q(title__icontains=search) | Q(body__icontains=search)).order_by('-created_at')
+  else:   
+    posts = category.post_set.all().order_by('-created_at')
+  
+  search_form = SearchPostForm(request.GET)
+
+  #pagination
+  items_per_page = 5
+
+  paginator = Paginator(posts, items_per_page)
+  page_number = request.GET.get('page') if 'page' in request.GET else 1
+
+  #form page links if has search
+  page_link = f"?q={search}&page=" if search is not None else "?page="
+    
+  try:
+    posts = paginator.page(page_number)
+  except EmptyPage:
+    posts = None
+
+  context = {
+    'header' : category.name + " Posts ",
+    'posts': posts,
+    'category' : category,
+    'search_form' : search_form,
+    'search_q' : search,
+    'page_link' : page_link
+  }
+
+  return render(request, 'category_post.html', context)
